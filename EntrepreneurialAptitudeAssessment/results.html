@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assessment Results</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Assessment Results</h1>
+        <p id="userName"></p>
+        <p id="userEmail"></p>
+        <p id="assessmentType"></p>
+        <p id="scoreDisplay">Your score is: <span id="score"></span></p>
+        <p id="interpretation"></p>
+        <button onclick="window.location.href='index.html'">Back to Home</button>
+        <button onclick="showPreviousResult()">Show Previous Result</button>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const score = sessionStorage.getItem('assessmentScore');
+            const firstName = sessionStorage.getItem('firstName');
+            const lastName = sessionStorage.getItem('lastName');
+            const email = sessionStorage.getItem('email');
+            const assessmentType = sessionStorage.getItem('assessmentType');
+
+            if (score !== null && firstName && lastName && email && assessmentType) {
+                document.getElementById('userName').textContent = `Name: ${firstName} ${lastName}`;
+                document.getElementById('userEmail').textContent = `Email: ${email}`;
+                document.getElementById('assessmentType').textContent = `Assessment Type: ${assessmentType}`;
+                document.getElementById('score').textContent = score;
+                document.title = `Assessment Results for ${firstName} ${lastName}`;
+                displayInterpretation(parseInt(score), assessmentType); // Call interpretation function
+                sendScoreToServer(firstName, lastName, email, score, assessmentType);
+            } else {
+                alert('Some information not found. Please retake the assessment.');
+                window.location.href = 'index.html';
+            }
+        });
+
+      function sendScoreToServer(firstName, lastName, email, score, assessmentType) {
+            const url = 'https://script.google.com/macros/s/AKfycbzwQ_D3f_FsrMMVSnTz1x62MaF-Dosc5BM0qEbiPpla6SxUD3pQOPYw-ziYzxTMuyc/exec';
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    firstName: firstName,
+                    lastName: lastName,
+                    email: email,
+                    assessmentType: assessmentType,
+                    score: score
+                })
+            })
+            .then(response => {
+                console.log("Response Status:", response.status);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                return response.json(); // Or response.text() if your server sends plain text
+            })
+            .then(data => {
+                console.log('Success:', data);
+                alert('Score saved successfully!');
+                // Handle success message or further actions
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // Handle error (e.g., display an error message to the user)
+                alert('Failed to save score: ' + error.message + ".  Check console for details.");
+            });
+        }
+
+        function displayInterpretation(score, assessmentType) {
+            let interpretationText = '';
+
+            let isShortAssessment = (assessmentType === "Short Assessment")
+
+             if ((isShortAssessment && score >= 65) || (!isShortAssessment && score >= 130)) {
+                interpretationText = "Highly Entrepreneurial: You demonstrate strong entrepreneurial traits and are well-suited for business ownership.";
+            } else if ((isShortAssessment && score >= 50) || (!isShortAssessment && score >= 100)) {
+                interpretationText = "Moderately Entrepreneurial: You have some entrepreneurial inclinations but may benefit from further development.";
+            } else {
+                interpretationText = "Less Entrepreneurial: You may be more comfortable in a structured employment environment.";
+            }
+
+            document.getElementById('interpretation').textContent = interpretationText;
+        }
+        function showPreviousResult() {
+            // Redirect to a new HTML page where you can review previous results
+            window.location.href = 'previous_results.html';
+        }
+    </script>
+</body>
+</html>

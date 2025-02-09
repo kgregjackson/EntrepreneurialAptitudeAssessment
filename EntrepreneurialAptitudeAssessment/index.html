@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entrepreneurial Aptitude Assessment</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to the Entrepreneurial Aptitude Assessment</h1>
+        <p>This Entrepreneurial Aptitude Assessment is your starting point for understanding whether you're naturally inclined towards the structured world of employment or the dynamic realm of business ownership. But first, we challenge you to be honest with yourself – the more authentic your answers, the more valuable your results.</p>
+        <form id="landingForm">
+            <div class="input-group">
+                <label for="firstName">First Name:</label>
+                <input type="text" id="firstName" name="firstName" required>
+            </div>
+            <div class="input-group">
+                <label for="lastName">Last Name:</label>
+                <input type="text" id="lastName" name="lastName" required>
+            </div>
+            <div class="input-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <button type="button" onclick="startAssessment('short')">Start Short Assessment</button>
+            <button type="button" onclick="startAssessment('long')">Start Full Assessment</button>
+        </form>
+    </div>
+    <script>
+        // Clear previous test when the form is reloaded
+         sessionStorage.clear();
+
+        function startAssessment(type) {
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const email = document.getElementById('email').value;
+
+            if (!firstName || !lastName || !email) {
+                alert('Please fill in all required fields.');
+                return;
+            }
+
+            if (!isValidEmail(email)) {
+                alert('Please enter a valid email address.');
+                return;
+            }
+
+            // Store user info in session storage
+            sessionStorage.setItem('firstName', firstName);
+            sessionStorage.setItem('lastName', lastName);
+            sessionStorage.setItem('email', email);
+
+            if (type === 'short') {
+                window.location.href = 'short_assessment.html';
+            } else {
+                window.location.href = 'long_assessment.html';
+            }
+        }
+
+        function isValidEmail(email) {
+            // Basic email validation using regex
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+    </script>
+</body>
+</html>

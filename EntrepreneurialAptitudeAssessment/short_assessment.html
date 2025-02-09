@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Short Entrepreneurial Aptitude Assessment</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Short Entrepreneurial Aptitude Assessment</h1>
+        <p id="userName"></p>
+        <p id="userEmail"></p>
+        <form id="assessmentForm">
+            <div id="questions-container">
+                </div>
+                <button type="button" onclick="showPreviousQuestion()" id="backBtn">Back</button>
+                <button type="button" onclick="showNextQuestion()" id="nextBtn">Next</button>
+                <button type="button" onclick="submitAssessment()" id="submitBtn">Submit</button>
+            </form>
+        </div>
+        <script>
+            const questions = [
+                { text: "I enjoy taking risks to achieve potential rewards.", reverseScore: false },
+                { text: "I prefer a stable and predictable work environment.", reverseScore: true },
+                { text: "I am confident in my ability to solve problems creatively.", reverseScore: false },
+                { text: "I am comfortable making decisions with limited information.", reverseScore: false },
+                { text: "I am highly self-motivated and don't need much supervision.", reverseScore: false },
+                { text: "I enjoy networking and building relationships with new people.", reverseScore: false },
+                { text: "I am persistent and don't give up easily when faced with obstacles.", reverseScore: false },
+                { text: "I am good at identifying opportunities that others might miss.", reverseScore: false },
+                { text: "I am comfortable with the idea of working long and irregular hours.", reverseScore: false },
+                { text: "I am willing to invest my own money into a business venture.", reverseScore: false },
+                { text: "I am good at managing my time and prioritizing tasks effectively.", reverseScore: false },
+                { text: "I am comfortable delegating tasks to others.", reverseScore: false },
+                { text: "I am always looking for ways to improve processes and systems.", reverseScore: false },
+                { text: "I am comfortable promoting myself and my ideas to others.", reverseScore: false },
+                { text: "I regularly come up with new ideas or projects.", reverseScore: false }
+            ];
+
+            let currentQuestionIndex = 0;
+
+            document.addEventListener('DOMContentLoaded', () => {
+                loadUserInfo();
+                generateQuestions();
+                showQuestion(currentQuestionIndex);
+            });
+
+            function loadUserInfo() {
+                const firstName = sessionStorage.getItem('firstName');
+                const lastName = sessionStorage.getItem('lastName');
+                const email = sessionStorage.getItem('email');
+
+                if (firstName && lastName && email) {
+                    document.getElementById('userName').textContent = `Name: ${firstName} ${lastName}`;
+                    document.getElementById('userEmail').textContent = `Email: ${email}`;
+                } else {
+                    alert('User information not found. Please return to the landing page.');
+                    window.location.href = 'index.html'; // Redirect if no user info
+                }
+            }
+
+            function generateQuestions() {
+                const questionsContainer = document.getElementById('questions-container');
+                questions.forEach((question, index) => {
+                    const questionDiv = document.createElement('div');
+                    questionDiv.classList.add('question');
+                    questionDiv.id = `question${index + 1}`;
+                    if (index > 0) {
+                        questionDiv.classList.add('hidden');
+                    }
+
+                    questionDiv.innerHTML = `
+                        <p>${index + 1}. ${question.text}</p>
+                        <label><input type="radio" name="question${index + 1}" value="5"> Strongly Agree</label>
+                        <label><input type="radio" name="question${index + 1}" value="4"> Agree</label>
+                        <label><input type="radio" name="question${index + 1}" value="3"> Neutral</label>
+                        <label><input type="radio" name="question${index + 1}" value="2"> Disagree</label>
+                        <label><input type="radio" name="question${index + 1}" value="1"> Strongly Disagree</label>
+                    `;
+                    questionsContainer.appendChild(questionDiv);
+                });
+            }
+
+            function showQuestion(index) {
+                const questions = document.querySelectorAll('.question');
+                questions.forEach((question, i) => {
+                    question.classList.toggle('hidden', i !== index);
+                });
+
+                updateButtonVisibility();
+            }
+
+            function showNextQuestion() {
+                if (currentQuestionIndex < questions.length - 1) {
+                    currentQuestionIndex++;
+                    showQuestion(currentQuestionIndex);
+                }
+            }
+
+            function showPreviousQuestion() {
+                if (currentQuestionIndex > 0) {
+                    currentQuestionIndex--;
+                    showQuestion(currentQuestionIndex);
+                }
+            }
+
+            function updateButtonVisibility() {
+                document.getElementById('backBtn').style.display = currentQuestionIndex === 0 ? 'none' : 'inline';
+                document.getElementById('nextBtn').style.display = currentQuestionIndex === questions.length - 1 ? 'none' : 'inline';
+                document.getElementById('submitBtn').style.display = currentQuestionIndex === questions.length - 1 ? 'inline' : 'none';
+            }
+
+            function submitAssessment() {
+                let score = 0;
+                for (let i = 1; i <= questions.length; i++) {
+                    const selectedValue = document.querySelector(`input[name="question${i}"]:checked`);
+                    if (!selectedValue) {
+                        alert(`Please answer question ${i}`);
+                        return;
+                    }
+
+                    let questionScore = parseInt(selectedValue.value);
+                    if (questions[i - 1].reverseScore) {
+                        questionScore = 6 - questionScore; // Reverse the score (1 becomes 5, 2 becomes 4, etc.)
+                    }
+                    score += questionScore;
+                }
+
+                 sessionStorage.setItem('assessmentType', 'Short Assessment'); // Store the type
+                 sessionStorage.setItem('assessmentScore', score); // Store score for the results page
+                window.location.href = 'results.html';
+            }
+        </script>
+    </body>
+    </html>
