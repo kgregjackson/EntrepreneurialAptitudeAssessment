@@ -14,8 +14,8 @@
         <p id="assessmentType"></p>
         <p id="scoreDisplay">Your score is: <span id="score"></span></p>
         <p id="interpretation"></p>
+        <button onclick="downloadResults()">Download Results</button>
         <button onclick="window.location.href='index.html'">Back to Home</button>
-        <button onclick="showPreviousResult()">Show Previous Result</button>
     </div>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -32,47 +32,20 @@
                 document.getElementById('score').textContent = score;
                 document.title = `Assessment Results for ${firstName} ${lastName}`;
                 displayInterpretation(parseInt(score), assessmentType); // Call interpretation function
-                sendScoreToServer(firstName, lastName, email, score, assessmentType);
-            } else {
-                alert('Some information not found. Please retake the assessment.');
-                window.location.href = 'index.html';
-            }
-        });
 
-      function sendScoreToServer(firstName, lastName, email, score, assessmentType) {
-            const url = 'https://script.google.com/macros/s/AKfycbzwQ_D3f_FsrMMVSnTz1x62MaF-Dosc5BM0qEbiPpla6SxUD3pQOPYw-ziYzxTMuyc/exec';
-
-            fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
+                // Save results to local storage
+                localStorage.setItem('assessmentResults', JSON.stringify({
                     firstName: firstName,
                     lastName: lastName,
                     email: email,
                     assessmentType: assessmentType,
                     score: score
-                })
-            })
-            .then(response => {
-                console.log("Response Status:", response.status);
-                if (!response.ok) {
-                    throw new Error('Network response was not ok ' + response.statusText);
-                }
-                return response.json(); // Or response.text() if your server sends plain text
-            })
-            .then(data => {
-                console.log('Success:', data);
-                alert('Score saved successfully!');
-                // Handle success message or further actions
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                // Handle error (e.g., display an error message to the user)
-                alert('Failed to save score: ' + error.message + ".  Check console for details.");
-            });
-        }
+                }));
+            } else {
+                alert('Some information not found. Please retake the assessment.');
+                window.location.href = 'index.html';
+            }
+        });
 
         function displayInterpretation(score, assessmentType) {
             let interpretationText = '';
@@ -89,9 +62,26 @@
 
             document.getElementById('interpretation').textContent = interpretationText;
         }
-        function showPreviousResult() {
-            // Redirect to a new HTML page where you can review previous results
-            window.location.href = 'previous_results.html';
+
+        function downloadResults() {
+            const results = localStorage.getItem('assessmentResults');
+            if (results) {
+                const data = JSON.parse(results);
+                const filename = `assessment_results_${data.firstName}_${data.lastName}.json`;
+                const json = JSON.stringify(data, null, 2); // Format for readability
+                const blob = new Blob([json], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url); // Clean up the URL
+            } else {
+                alert('No results found to download.');
+            }
         }
     </script>
 </body>
